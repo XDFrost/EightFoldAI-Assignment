@@ -1,0 +1,25 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.121.3",
+    "httpx>=0.28.1",
+    "langchain>=1.0.8",
+    "langchain-google-genai>=3.1.0",
+    "langchain-pinecone>=0.2.13",
+    "langgraph>=1.0.3",
+    "openai>=2.8.1",
+    "perplexityai[aiohttp]>=0.20.0",
+    "pinecone-client>=6.0.0",
+    "psycopg2-binary>=2.9.11",
+    "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
+    "supabase>=2.24.0",
+    "tavily-python>=0.7.13",
+    "uvicorn[standard]>=0.38.0",
+    "websockets>=15.0.1",
+    "pyjwt>=2.8.0",
+]
