@@ -7,7 +7,7 @@ This guide will help you set up the EightFold AI project, which consists of thre
 
 ## Prerequisites
 
--   **Node.js** (v18+ recommended)
+-   **Node.js** (v20.19+ recommended)
 -   **Python** (v3.11+)
 -   **uv** (Python package manager) - [Install uv](https://github.com/astral-sh/uv)
 -   **Supabase Account** (for Database & Auth)
