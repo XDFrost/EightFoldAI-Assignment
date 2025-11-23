@@ -10,7 +10,7 @@ The project follows a modern **microservices architecture** consisting of three 
 2.  **Business Backend (Node.js)**: Handles user authentication, session management, and analytics.
 3.  **AI Service (Python)**: The core intelligence engine powered by LangGraph, responsible for research orchestration, RAG, and LLM interactions.
 
-```mermaid
+```js
 graph TD
     User[User] -->|HTTPS/WSS| Frontend[Frontend (React)]
     Frontend -->|REST API| NodeBE[Business Backend (Node.js)]
@@ -27,7 +27,7 @@ graph TD
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### **Frontend**
 *   **Framework**: React 19 (via Vite)
@@ -57,7 +57,7 @@ graph TD
 
 ---
 
-## 💡 Design Decisions & Rationale
+## Design Decisions & Rationale
 
 ### 1. **Microservices Architecture (Node.js + Python)**
 *   **Decision**: Split the backend into two services.
@@ -91,6 +91,6 @@ graph TD
 
 ---
 
-## 🚀 Setup
+## Setup
 
 For detailed setup instructions, please refer to **[SETUP.md](./SETUP.md)**.

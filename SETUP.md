@@ -21,9 +21,8 @@ This guide will help you set up the EightFold AI project, which consists of thre
 ## 1. Database Setup (Supabase)
 
 1.  Create a new Supabase project.
-2.  Go to the SQL Editor in the Supabase Dashboard.
-3.  Run the contents of `Ai-Service/supabase_schema.sql` to set up the tables (`users`, `account_plans`, `research_data`, `conversations`, `messages`).
-4.  Note down your `SUPABASE_URL` and `SUPABASE_KEY` (service_role key is recommended for backend).
+2.  Note down your `SUPABASE_URL`, `SUPABASE_KEY` and `DATABASE_URL`
+3.  Run the ai-service, it'll automatically create the DB tables.
 
 ---
 
@@ -46,6 +45,7 @@ uv sync
 ### Configuration
 - **Project Configuration**: You can customize all project configurations in `Ai-Service/app/Config/dataConfig.py`.
 - **Prompts**: You can customize all system prompts in `app/Config/promptConfig.py`.
+- **Queries**: You can customize all queries `app/Config/queryConfig.py`.
 
 ### Run the Service
 ```bash
