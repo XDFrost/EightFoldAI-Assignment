@@ -32,13 +32,17 @@ class PromptConfig(Enum):
                 Previous Assistant Message (Context): "{prev_ai_message}"
                 
                 Classify the intent as one of:
-                - "research_company": If the user asks to research, find info, or learn about a company.
+                - "research_company": If the user asks to research, find info, learn about a company, OR asks to "add more info", "find numbers", "dig deeper" on a previous research topic.
                 - "generate_plan": If the user asks to create, generate, or write an account plan or document.
-                - "edit_section": If the user asks to change, update, or edit a specific part of a plan.
+                - "edit_section": ONLY if the user explicitly asks to change/update a specific SECTION of an EXISTING PLAN (e.g. "change the executive summary", "update the financials section").
                 - "chat": For greetings, questions, or general conversation.
-                - "answer_clarification": If the user is answering a clarification question asked by the assistant (e.g. "Yes, dig deeper").
+                - "answer_clarification": If the user is answering a clarification question asked by the assistant.
                 
-                Extract the "company" name if present.
+                Entity Extraction Rules:
+                1. Extract the "company" name. If not in the User Message, look in the "Previous Assistant Message".
+                2. Extract the "section" name ONLY for "edit_section" intent.
+                
+                CRITICAL: If the user says "add numbers", "tell me more", or "expand on this" after a Research Report, the intent is "research_company", NOT "edit_section".
                 """
     )
 
@@ -47,18 +51,43 @@ class PromptConfig(Enum):
                 Analyze these research findings for {company}:
                 {research_data} # Truncate to avoid token limits
                 
-                Are there conflicting facts or major ambiguities that require user input to resolve? 
-                Or is the information sufficient for a general overview?
+                Your goal is to determine if the information is sufficient to write a comprehensive report or if there are major gaps/conflicts.
+                
+                CRITICAL: If you find conflicting information (e.g. different revenue figures, contradictory dates), you MUST ask the user for clarification.
                 
                 If you need user input, output: "QUESTION: <your question>"
                 If sufficient, output: "SUFFICIENT"
                 
-                Example: "QUESTION: I found conflicting revenue figures. Should I look into the 2023 annual report specifically?"
+                Example: "QUESTION: I found conflicting revenue figures for 2023 (Source A says $1B, Source B says $1.5B). Which source should I prioritize?"
                 """
     )
 
-    ResearchSummarization = Prompt(
-        SYSTEM_PROMPT="Summarize these research findings for {company}: {research_data}"
+    ResearchSynthesis = Prompt(
+        SYSTEM_PROMPT="""
+                You are an expert research analyst. Synthesize the following research data for {company} into a comprehensive, professional report.
+                
+                Research Data:
+                {research_data}
+                
+                Format the report using Markdown with the following structure:
+                
+                # Research Report: {company}
+                
+                ## Executive Summary
+                (A concise high-level overview of the findings)
+                
+                ## Key Findings
+                (Bulleted list of the most important facts)
+                
+                ## Detailed Analysis
+                (Deep dive into the data, organized by topic e.g., Financials, Market Position, Recent Events. Use subheaders.)
+                
+                ## Sources & References
+                (List the sources used)
+                
+                Tone: Professional, objective, and analytical.
+                Do NOT just list facts; connect them to provide insights.
+                """
     )
 
     PlanGeneration = Prompt(
@@ -97,6 +126,29 @@ class PromptConfig(Enum):
                 User Instruction: "{user_instruction}"
                 
                 Rewrite the section content based on the instruction. Return ONLY the new content text.
+                """
+    )
+
+    QueryGeneration = Prompt(
+        SYSTEM_PROMPT="""
+                You are a search query expert. Your task is to generate optimized search queries for Tavily and Perplexity based on the user's request and conversation history.
+                
+                Context:
+                Company: {company}
+                User Message: "{user_message}"
+                Previous History: "{prev_history}"
+                
+                Generate two queries:
+                1. "tavily_query": A concise query for finding the latest news, facts, or specific data points (e.g. "Twitter revenue 2024", "Tesla stock price today").
+                2. "perplexity_query": A detailed, natural language query for deep analysis (e.g. "Detailed financial analysis of Twitter's revenue growth in 2024", "Impact of recent recalls on Tesla's market share").
+                
+                If the user message is a follow-up (e.g. "add numbers", "tell me more"), use the history to construct a full query.
+                
+                Output JSON format:
+                {{
+                    "tavily_query": "...",
+                    "perplexity_query": "..."
+                }}
                 """
     )
 

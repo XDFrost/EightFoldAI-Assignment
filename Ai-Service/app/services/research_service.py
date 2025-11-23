@@ -84,14 +84,24 @@ class ResearchService:
         company_name: str, 
         scope: str = "General", 
         send_callback=None, 
-        custom_query: str = None
+        custom_query: str = None,
+        tavily_query: str = None,
+        perplexity_query: str = None
     ) -> Dict[str, Any]:
         
-        tavily_query = custom_query if custom_query else f"Research {company_name} {scope}"
-        perplexity_query = custom_query if custom_query else f"Detailed research on {company_name} focusing on {scope}"
+        if not tavily_query:
+            tavily_query = custom_query if custom_query else f"Research {company_name} {scope}"
+        
+        if not perplexity_query:
+            perplexity_query = custom_query if custom_query else f"Detailed research on {company_name} focusing on {scope}"
         
         tavily_res = await self.search_tavily(tavily_query, send_callback)
+        if send_callback:
+            await send_callback(StatusUpdate(payload={"stage": "research", "message": "Tavily search complete. Analyzing results..."}))
+
         perplexity_res = await self.search_perplexity(perplexity_query, send_callback)
+        if send_callback:
+            await send_callback(StatusUpdate(payload={"stage": "research", "message": "Perplexity research complete. Processing data..."}))
         
         # Store in KB
         if perplexity_res and "results" in perplexity_res:

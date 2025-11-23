@@ -17,6 +17,11 @@ from app.utils.logger import logger
 import json
 import uuid
 
+
+class SearchQueries(BaseModel):
+    tavily_query: str = Field(description="Concise query for Tavily")
+    perplexity_query: str = Field(description="Detailed query for Perplexity")
+
 class ListSectionUpdate(BaseModel):
     items: List[str] = Field(description="The updated list of items")
 
@@ -172,13 +177,42 @@ class Orchestrator:
                     # If a follow-up, we append the user's answer to the previous context for the query
                     user_query = f"Context: {last_ai} User Answer: {user_query}. Perform research based on this decision."
 
+            query_gen_llm = self.llm.with_structured_output(SearchQueries)
+            
+            prev_history = ""
+            if len(state["messages"]) > 1:
+                prev_history = "\n".join([f"{m.type}: {m.content}" for m in state["messages"][-3:-1]])
+
+            query_prompt = PromptConfig.QueryGeneration.value.SYSTEM_PROMPT.format(
+                company=company,
+                user_message=user_query,
+                prev_history=prev_history
+            )
+            
+            try:
+                queries = await query_gen_llm.ainvoke(query_prompt)
+                tavily_q = queries.tavily_query
+                perplexity_q = queries.perplexity_query
+                
+                await send_callback(StatusUpdate(payload={"stage": "research", "message": f"Generated queries:\n1. {tavily_q}\n2. {perplexity_q}"}))
+            except Exception as e:
+                logger.error(f"Query generation failed: {e}")
+                tavily_q = user_query
+                perplexity_q = user_query
+
             await send_callback(
                 StatusUpdate(
                     payload={"stage": "research", "message": f"Starting research on {company}..."}
                     )
                 )
             
-            data = await self.research_service.research_company(company, region, send_callback, custom_query=user_query)
+            data = await self.research_service.research_company(
+                company, 
+                region, 
+                send_callback, 
+                tavily_query=tavily_q, 
+                perplexity_query=perplexity_q
+            )
             
             # EVALUATION STEP: Check for ambiguity
             # Only do this if a question isn't just asked (to avoid infinite loops)
@@ -206,8 +240,10 @@ class Orchestrator:
                 await send_callback(AssistantChunk(payload={"message_id": "q_1", "chunk": question_to_user}))
                 return {"messages": state["messages"] + [AIMessage(content=question_to_user)]}
             
-            # Summarize
-            summary_prompt = PromptConfig.ResearchSummarization.value.SYSTEM_PROMPT.format(
+            # Synthesize Report
+            await send_callback(StatusUpdate(payload={"stage": "research", "message": "Synthesizing comprehensive report..."}))
+            
+            summary_prompt = PromptConfig.ResearchSynthesis.value.SYSTEM_PROMPT.format(
                 company=company,
                 research_data=json.dumps(data)
             )
