@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
-from typing import List
+from typing import List, Optional
 import os
 from pathlib import Path
 
@@ -43,12 +43,23 @@ class Config:
         GOOGLE_API_KEY: str
         SUPABASE_URL: str
         SUPABASE_KEY: str
-        TAVILY_API_KEY: str
-        PERPLEXITY_API_KEY: str
         DATABASE_URL: str
         JWT_SECRET: str
         PINECONE_API_KEY: str
         PINECONE_INDEX: str
+        TAVILY_API_KEY: Optional[str] = None
+        PERPLEXITY_API_KEY: Optional[str] = None
+        DEEPGRAM_API_KEY: Optional[str] = None
+        ALGORITHM: str = "HS256"
+
+        TTS_MODEL: str = "aura-asteria-en"
+
+        TRANSCRIPTION_MODEL: str = "nova-2"
+        TRANSCRIPTION_LANGUAGE: str = "en-US"
+        TRANSCRIPTION_SMART_FORMAT: bool = True
+        INTERIM_RESULTS: bool = True
+        UTTERANCE_END_MS: int = 3000
+        VAD_EVENTS: bool = True
 
         SupabaseTables: List[str] = field(default_factory=lambda: [
             "account_plans",
@@ -85,6 +96,7 @@ class Config:
             pinecone_api_key = os.getenv("PINECONE_API_KEY")
             pinecone_index = os.getenv("PINECONE_INDEX")
             jwt_secret = os.getenv("JWT_SECRET")
+            deepgram_api_key = os.getenv("DEEPGRAM_API_KEY")
 
             missing = []
             if not google_api_key: missing.append("GOOGLE_API_KEY")
@@ -96,6 +108,7 @@ class Config:
             if not perplexity_api_key: missing.append("PERPLEXITY_API_KEY")
             if not database_url: missing.append("DATABASE_URL")
             if not jwt_secret: missing.append("JWT_SECRET")
+            if not deepgram_api_key: missing.append("DEEPGRAM_API_KEY")
 
             if missing:
                 raise ValueError(f"Missing environment variables: {', '.join(missing)}")
@@ -109,5 +122,7 @@ class Config:
                 DATABASE_URL=database_url,
                 JWT_SECRET=jwt_secret,
                 PINECONE_API_KEY=pinecone_api_key,
-                PINECONE_INDEX=pinecone_index
+                PINECONE_INDEX=pinecone_index,
+                DEEPGRAM_API_KEY=deepgram_api_key
             )
+        

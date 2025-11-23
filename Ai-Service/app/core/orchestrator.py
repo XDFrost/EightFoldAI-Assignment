@@ -1,11 +1,11 @@
 from app.schemas.websocket_messages import StatusUpdate, AssistantChunk, PlanUpdate
-from app.Config.promptConfig import PromptConfig
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from app.services.knowledge_base import KnowledgeBaseService
 from app.services.research_service import ResearchService
 from app.schemas.websocket_messages import MessageUpdate
 from langchain_core.prompts import ChatPromptTemplate
 from app.services.plan_service import PlanService
+from app.Config.promptConfig import PromptConfig
 from typing import TypedDict, List, Dict, Any
 from app.schemas.intent import IntentAnalysis
 from app.states.global_state import services
@@ -45,7 +45,8 @@ class Orchestrator:
         send_callback, 
         user_id: str = None, 
         selected_text: str = None, 
-        source_message_id: str = None
+        source_message_id: str = None,
+        save_messages: bool = True
     ) -> None:
         """
         Runs the LangGraph flow.
@@ -95,14 +96,15 @@ class Orchestrator:
              message_text = f"Context: {selected_text}\n\nInstruction: {message_text}"
         
         # Save user message
-        try:
-            await supabase.table("messages").insert({
-                "conversation_id": session_id,
-                "role": "user",
-                "content": original_message 
-            }).execute()
-        except Exception as e:
-            logger.error(f"Failed to save user message: {e}")
+        if save_messages:
+            try:
+                await supabase.table("messages").insert({
+                    "conversation_id": session_id,
+                    "role": "user",
+                    "content": original_message 
+                }).execute()
+            except Exception as e:
+                logger.error(f"Failed to save user message: {e}")
         
         # Node Definitions
         
@@ -130,6 +132,17 @@ class Orchestrator:
                 
                 entities_dict = result.entities.dict()
                 
+                # Broadcast detected intent
+                mode_msg = "Chatting..."
+                if result.intent == "research_company":
+                    mode_msg = f"Researching {entities_dict.get('company', '')}..."
+                elif result.intent == "generate_plan":
+                    mode_msg = "Generating Plan..."
+                elif result.intent == "edit_section":
+                    mode_msg = "Editing Plan..."
+                
+                await send_callback(StatusUpdate(payload={"stage": "intent", "message": mode_msg}))
+                
                 # For now, assuming that clarification is mostly about research depth.
                 if result.intent == "answer_clarification":
                     return {"intent": "research_company", "entities": entities_dict}
@@ -137,6 +150,7 @@ class Orchestrator:
                 return {"intent": result.intent, "entities": entities_dict}
             except Exception as e:
                 logger.error(f"Intent analysis failed: {e}")
+                await send_callback(StatusUpdate(payload={"stage": "intent", "status": "Chatting..."}))
                 return {"intent": "chat", "entities": {}}
 
         async def research_node(state: AgentState):
@@ -539,7 +553,7 @@ class Orchestrator:
         # Assume the last message in 'messages' is the ai's response if it's an AIMessage.
         
         last_msg = final_state["messages"][-1]
-        if isinstance(last_msg, AIMessage):
+        if isinstance(last_msg, AIMessage) and save_messages:
             try:
                 msg_data = {
                     "conversation_id": session_id,

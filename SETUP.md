@@ -15,6 +15,7 @@ This guide will help you set up the EightFold AI project, which consists of thre
 -   **Google Gemini API Key** (for Embeddings/LLM)
 -   **Tavily API Key** (for Search)
 -   **Perplexity API Key** (for Search)
+-   **Deepgram API Key** (for Voice STT/TTS)
 
 ---
 

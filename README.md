@@ -53,6 +53,7 @@ graph TD
 *   **Models**: Google Gemini 2.0 Flash 
 *   **Vector DB**: Pinecone (Managed vector search for RAG)
 *   **Search Tools**: Tavily (Optimized for LLM context), Perplexity (Deep research)
+*   **Voice**: Deepgram (Low-latency STT & TTS)
 *   **Package Manager**: `uv` (Fast Python package installer)
 
 ---
@@ -88,6 +89,10 @@ graph TD
 ### 6. **Human-in-the-Loop (HITL)**
 *   **Decision**: The AI explicitly pauses to ask for user input if research is ambiguous.
 *   **Why**: Hallucination is a major risk in autonomous agents. By detecting ambiguity and asking the user ("Did you mean X or Y?"), we significantly increase the reliability of the final report.
+
+### 7. **Voice Interaction (Deepgram)**
+*   **Decision**: Use Deepgram for both STT and TTS over WebSockets.
+*   **Why**: Latency is critical for voice. Deepgram offers one of the fastest transcription and speech generation APIs. By streaming audio directly over the existing WebSocket connection, we minimize overhead and enable features like "barge-in" (interruption) for a natural conversation flow.
 
 ---
 

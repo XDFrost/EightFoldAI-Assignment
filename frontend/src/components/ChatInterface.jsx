@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, User, PanelLeft, Quote, X } from 'lucide-react';
+import { Send, Loader2, User, PanelLeft, Quote, X, Bot, Mic, Settings, LogOut } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import api from '../utils/api';
 import { useToast } from './ui/use-toast';
 import veritasIcon from '../assets/veritas-nobg.svg';
+import VoiceInterface from './VoiceInterface';
 
 const ChatInterface = ({ chatId, setChatId, isSidebarOpen, toggleSidebar }) => {
     const [messages, setMessages] = useState([]);
@@ -217,6 +218,15 @@ const ChatInterface = ({ chatId, setChatId, isSidebarOpen, toggleSidebar }) => {
         }, 500);
     };
 
+    const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        window.location.reload();
+    };
+
+    // ... (existing code)
+
     return (
         <div className="flex-1 flex flex-col h-screen bg-gray-950 relative">
             {/* Floating Edit Button */}
@@ -234,16 +244,20 @@ const ChatInterface = ({ chatId, setChatId, isSidebarOpen, toggleSidebar }) => {
                 </div>
             )}
 
-            {/* Header / Toggle Button */}
+            <VoiceInterface isOpen={isVoiceOpen} onClose={() => setIsVoiceOpen(false)} />
+
+            {/* Floating Header Buttons */}
             <div className="absolute top-4 left-4 z-10">
                 <button
                     onClick={toggleSidebar}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors"
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-md transition-colors backdrop-blur-sm"
                     title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
                 >
                     <PanelLeft size={24} />
                 </button>
             </div>
+
+
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 pt-16 space-y-8 scroll-smooth">
@@ -385,6 +399,14 @@ const ChatInterface = ({ chatId, setChatId, isSidebarOpen, toggleSidebar }) => {
                             className="relative w-full bg-gray-900 text-white rounded-xl pl-6 pr-14 py-4 shadow-2xl focus:outline-none focus:ring-0 placeholder-gray-500 text-lg resize-none min-h-[60px] max-h-[200px] overflow-y-auto"
                             rows={1}
                         />
+                        <button
+                            type="button"
+                            onClick={() => setIsVoiceOpen(true)}
+                            className="absolute right-12 top-3 p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700 transition-all"
+                            title="Voice Mode"
+                        >
+                            <Mic size={20} />
+                        </button>
                         <button
                             type="submit"
                             disabled={!input.trim()}
