@@ -39,25 +39,28 @@ async def websocket_endpoint(websocket: WebSocket):
         except Exception as e:
             logger.warning(f"Failed to send message to client (disconnected?): {e}")
 
-    while True:
-        data = await websocket.receive_json()
-        # Basic validation
-        try:
-            user_msg = UserMessage(**data)
-            payload = user_msg.payload
-
-            text = payload.text
-            selected_text = payload.selected_text
-            source_message_id = payload.source_message_id
-            
-            if text:
-                await orchestrator.handle_message(text, session_id, send_callback, user_id, selected_text, source_message_id)
-        except WebSocketDisconnect:
-            raise 
-        except Exception as e:
-            logger.error(f"Error processing message: {e}")
+    try:
+        while True:
+            data = await websocket.receive_json()
+            # Basic validation
             try:
-                await websocket.send_json(ErrorMessage(payload={"code": "PROCESSING_ERROR", "message": str(e)}).dict())
-            except Exception:
-                logger.warning("Could not send error message to client (connection likely closed).")
-            
+                user_msg = UserMessage(**data)
+                payload = user_msg.payload
+
+                text = payload.text
+                selected_text = payload.selected_text
+                source_message_id = payload.source_message_id
+                
+                if text:
+                    await orchestrator.handle_message(text, session_id, send_callback, user_id, selected_text, source_message_id)
+            except Exception as e:
+                logger.error(f"Error processing message: {e}")
+                try:
+                    await websocket.send_json(ErrorMessage(payload={"code": "PROCESSING_ERROR", "message": str(e)}).dict())
+                except Exception:
+                    logger.warning("Could not send error message to client (connection likely closed).")
+    except WebSocketDisconnect:
+        return
+    except Exception as e:
+        logger.error(f"Error in websocket endpoint: {e}")
+        await websocket.close(code=1008, reason="Internal server error")

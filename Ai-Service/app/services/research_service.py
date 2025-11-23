@@ -54,21 +54,26 @@ class ResearchService:
                     )
 
             # AsyncPerplexity with context manager
-            async with AsyncPerplexity(api_key=self.perplexity_key, http_client=DefaultAioHttpClient()) as client:
-                search = await client.search.create(
-                    query=query,
-                    max_results=settings.PerplexityMaxResults
-                )
-                
-                results = []
-                for result in search.results:
-                    results.append({
-                        "title": getattr(result, "title", "No Title"),
-                        "url": getattr(result, "url", ""),
-                        "snippet": getattr(result, "snippet", "")
-                    })
-                
-                return {"results": results}
+            http_client = DefaultAioHttpClient()
+            try:
+                async with AsyncPerplexity(api_key=self.perplexity_key, http_client=http_client) as client:
+                    search = await client.search.create(
+                        query=query,
+                        max_results=settings.PerplexityMaxResults
+                    )
+                    
+                    results = []
+                    for result in search.results:
+                        results.append({
+                            "title": getattr(result, "title", "No Title"),
+                            "url": getattr(result, "url", ""),
+                            "snippet": getattr(result, "snippet", "")
+                        })
+                    
+                    return {"results": results}
+            finally:
+                if not http_client.is_closed:
+                    await http_client.aclose()
             
         except Exception as e:
             logger.error(f"Perplexity Exception: {e}")
@@ -136,5 +141,5 @@ class ResearchService:
             return None
 
     async def aclose(self):
-        # no close in async tavily 
+        # AsyncTavilyClient manages its own session per request, so no need to close.
         pass

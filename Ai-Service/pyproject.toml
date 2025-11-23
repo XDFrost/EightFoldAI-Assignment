@@ -13,7 +13,6 @@ dependencies = [
     "langgraph>=1.0.3",
     "openai>=2.8.1",
     "perplexityai[aiohttp]>=0.20.0",
-    "pinecone-client>=6.0.0",
     "psycopg2-binary>=2.9.11",
     "pydantic>=2.12.4",
     "python-dotenv>=1.2.1",
@@ -22,4 +21,5 @@ dependencies = [
     "uvicorn[standard]>=0.38.0",
     "websockets>=15.0.1",
     "pyjwt>=2.8.0",
+    "pinecone>=7.3.0",
 ]
