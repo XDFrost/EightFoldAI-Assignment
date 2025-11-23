@@ -282,12 +282,12 @@ const ChatInterface = ({ chatId, setChatId, isSidebarOpen, toggleSidebar }) => {
                                 <ReactMarkdown
                                     remarkPlugins={[remarkGfm]}
                                     components={{
-                                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-white mb-4 mt-6" {...props} />,
-                                        h2: ({ node, ...props }) => <h2 className="text-xl font-semibold text-gray-100 mb-3 mt-5" {...props} />,
+                                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-white mb-2 mt-6" {...props} />,
+                                        h2: ({ node, ...props }) => <h2 className="text-xl font-semibold text-gray-100 mb-2 mt-5" {...props} />,
                                         h3: ({ node, ...props }) => <h3 className="text-lg font-medium text-gray-200 mb-2 mt-4" {...props} />,
-                                        p: ({ node, ...props }) => <p className="mb-4 leading-relaxed" {...props} />,
-                                        ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
-                                        ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
+                                        p: ({ node, ...props }) => <p className="mb-2 leading-relaxed" {...props} />,
+                                        ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-2 space-y-2" {...props} />,
+                                        ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-2 space-y-2" {...props} />,
                                         li: ({ node, ...props }) => <li className="text-gray-300" {...props} />,
                                         a: ({ node, ...props }) => <a className="text-blue-400 hover:text-blue-300 underline transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
                                         code: ({ node, inline, className, children, ...props }) => {
