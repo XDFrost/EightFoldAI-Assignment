@@ -35,8 +35,6 @@ cd Ai-Service
 
 ### Environment Variables
 Create a `.env` file in `Ai-Service/` with the details inside .env.example
-```
-
 ### Install Dependencies
 ```bash
 uv sync
@@ -70,8 +68,6 @@ cd backend
 
 ### Environment Variables
 Create a `.env` file in `backend/` with the details inside .env.example
-```
-
 ### Install Dependencies
 ```bash
 npm install
